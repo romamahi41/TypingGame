@@ -14,84 +14,97 @@
       <h1>Typing Game</h1>
       <div class="marker"></div>
     </div>
-    <button v-if="!startFlg" class="startButton mb-20" @click="gameStart">START</button>
-    <div v-if="startFlg">
-      <div v-if="!miss_flg" class="miss">Miss!</div>
-      <div class="question mb-20">{{ current_question }}</div>
-      <div v-if="current_question_counts == question_counts" class="clear">Clear!!</div>
-      <div class="typeFormWrapper mb-20">
-        <input id="typeForm" v-model="typeBox" type="text" class="typeForm">
-      </div>
+    <div class="timer">
+      <div class="timer__text">経過時間</div>
+      <div class="timer__number">{{ timeElapsed.toFixed(2) }}</div>
+      <button v-if="!startFlg" class="startButton mb-20" @click="gameStart">START</button>
+      <div v-if="startFlg">
+        <div v-if="!miss_flg" class="miss">Miss!</div>
+        <div class="question mb-20">{{ current_question }}</div>
+        <div v-if="current_question_counts == question_counts" class="clear">Clear!!</div>
+        <div class="typeFormWrapper mb-20">
+          <input id="typeForm" v-model="typeBox" type="text" class="typeForm">
+        </div>
 
-      <div class="gaugeWrapper mb-20">
-        <div v-bind:style="styleObject" class="gauge"></div>
+        <div class="gaugeWrapper mb-20">
+          <div v-bind:style="styleObject" class="gauge"></div>
+        </div>
+        <div>{{ current_question_counts }}/{{question_counts}}</div>
       </div>
-      <div>{{ current_question_counts }}/{{question_counts}}</div>
     </div>
-  </div>
-  <script>
-    new Vue({
-      el: "#app",
-      data: {
-        startFlg: "",
-        current_question: "",
-        questions: [
-          '新宿', '新大久保', '高田馬場', '目白', '池袋', '大塚', '巣鴨', '駒込', '田端', '西日暮里', '日暮里', '鶯谷', '上野', '御徒町', '秋葉原',
-          '神田', '東京', '有楽町', '新橋', '浜松町', '田町', '品川', '大崎', '五反田', '目黒', '恵比寿', '渋谷', '原宿', '代々木',
-        ],
-        typeBox: "",
-        current_question_counts: 0,
-        question_counts: 0
-      },
+    <script>
+      new Vue({
+        el: "#app",
+        data: {
+          startFlg: "",
+          current_question: "",
+          questions: [
+            '新宿', '新大久保', '高田馬場', '目白', '池袋', '大塚', '巣鴨', '駒込', '田端', '西日暮里', '日暮里', '鶯谷', '上野', '御徒町', '秋葉原',
+            '神田', '東京', '有楽町', '新橋', '浜松町', '田町', '品川', '大崎', '五反田', '目黒', '恵比寿', '渋谷', '原宿', '代々木',
+          ],
+          typeBox: "",
+          current_question_counts: 0,
+          question_counts: 0,
+          timerStart: null,
+          timeElapsed: 0
+        },
 
-      computed: {
-        styleObject: function () {
-          width = 20 * this.current_question_counts + "%"
-          if (this.current_question_counts == 5) {
-            color = "#03a9f4"
-          } else {
-            color = "orange"
-          }
-          return {
-            'width': width,
-            'background-color': color
+        computed: {
+          styleObject: function () {
+            width = 20 * this.current_question_counts + "%"
+            if (this.current_question_counts == 5) {
+              color = "#03a9f4"
+            } else {
+              color = "orange"
+            }
+            return {
+              'width': width,
+              'background-color': color
+            }
+          },
+          miss_flg: function () {
+            if (this.typeBox !== "" && !this.current_question.startsWith(this.typeBox)) {
+              return false;
+            } else {
+              return true;
+            }
           }
         },
-        miss_flg: function () {
-          if (this.typeBox !== "" && !this.current_question.startsWith(this.typeBox)) {
-            return false;
-          } else {
-            return true;
+        methods: {
+          gameStart: function () {
+            this.startFlg = true;
+            this.timerStart = new Date();
+            this.$nextTick(function () {
+              document.getElementById('typeForm').focus()
+            })
+          },
+          timeEnd: function () {
+            let timerEnd = new Date();
+            this.timeElapsed = (timerEnd - this.timerStart) / 1000;
+          },
+        },
+        mounted: function () {
+          this.current_question = this.questions[0]
+          this.question_counts = this.questions.length
+        },
+        watch: {
+          typeBox: function (e) {
+            if (e === this.current_question) {
+              this.questions.splice(0, 1)
+              this.current_question = this.questions[0]
+              this.typeBox = ""
+              this.current_question_counts = this.current_question_counts + 1
+              if (this.current_question_counts === this.question_counts) {
+                this.timeEnd();
+              }
+            } else if (e !== "" && !this.current_question.startsWith(e)) {
+              setTimeout(() => {
+                this.typeBox = "";
+              }, 500)
+            }
           }
         }
-      },
-      methods: {
-        gameStart: function () {
-          this.startFlg = true;
-          this.$nextTick(function () {
-            document.getElementById('typeForm').focus()
-          })
-        }
-      },
-      mounted: function () {
-        this.current_question = this.questions[0]
-        this.question_counts = this.questions.length
-      },
-      watch: {
-        typeBox: function (e) {
-          if (e === this.current_question) {
-            this.questions.splice(0, 1)
-            this.current_question = this.questions[0]
-            this.typeBox = ""
-            this.current_question_counts = this.current_question_counts + 1
-          } else if (e !== "" && !this.current_question.startsWith(e)) {
-            setTimeout(() => {
-              this.typeBox = "";
-            }, 500)
-          }
-        }
-      }
-    })
-  </script>
+      })
+    </script>
 </body>
 </html>
