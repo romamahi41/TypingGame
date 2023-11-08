@@ -26,10 +26,7 @@
           <input id="typeForm" v-model="typeBox" type="text" class="typeForm">
         </div>
 
-        <div class="gaugeWrapper mb-20">
-          <div v-bind:style="styleObject" class="gauge"></div>
-        </div>
-        <div>{{ current_question_counts }}/{{question_counts}}</div>
+        <div>現在{{ current_question_counts }}駅通過<!-- /{{question_counts}} --></div>
       </div>
     </div>
     <script>
@@ -38,10 +35,11 @@
         data: {
           startFlg: "",
           current_question: "",
-          questions: [
-            '新宿', '新大久保', '高田馬場', '目白', '池袋', '大塚', '巣鴨', '駒込', '田端', '西日暮里', '日暮里', '鶯谷', '上野', '御徒町', '秋葉原',
-            '神田', '東京', '有楽町', '新橋', '浜松町', '田町', '品川', '大崎', '五反田', '目黒', '恵比寿', '渋谷', '原宿', '代々木',
-          ],
+          questions: [],
+          //           questions: [
+          //   '新宿', '新大久保', '高田馬場', '目白', '池袋', '大塚', '巣鴨', '駒込', '田端', '西日暮里', '日暮里', '鶯谷', '上野', '御徒町', '秋葉原',
+          //   '神田', '東京', '有楽町', '新橋', '浜松町', '田町', '品川', '大崎', '五反田', '目黒', '恵比寿', '渋谷', '原宿', '代々木',
+          // ],
           typeBox: "",
           current_question_counts: 0,
           question_counts: 0,
@@ -84,6 +82,22 @@
           },
         },
         mounted: function () {
+          const { Client } = require('pg');
+
+
+          //PostgreSQLとの接続情報
+          const client = new Client({
+            host: 'localhost',
+            port: 5432,
+            database: 'train_station',
+            user: 'guchiyamaryoma',
+            password: 'r46491129',
+          });
+
+          //PostgresSQLへ接続
+          client.connect();
+
+
           this.current_question = this.questions[0]
           this.question_counts = this.questions.length
         },
